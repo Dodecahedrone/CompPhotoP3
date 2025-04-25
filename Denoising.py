@@ -25,29 +25,32 @@ plt.show()
 
 print(psnr(img, img_noise))
 
-def gaussian_weighting(p1, p2, sigma):
-    return np.exp(-0.5 * ((p1-p2) ** 2) / (sigma ** 2))
+def gaussian_weighting(x1, y1, x2, y2, sigma):
+    mse = ((x1 - x2) ** 2 + (y1 - y2) ** 2) / 2.0
+    return np.exp(-0.5 * mse / (sigma ** 2))
 
 denoised = np.zeros(img_noise.shape, dtype=float)
 
-for i in range(0, img.shape[0]):
-    for j in range(0, img.shape[1]):
-        numerator = 0.0
-        denominator = 0.0
+sigmas = [1, 5, 25]
 
-        for w1 in range(-12, 13):
-            for w2 in range(-12, 13):
-                if not(w1 + i < 0 or w1 + i >= img.shape[0] or w2 + j < 0 or w2 + j >= img.shape[1]):
-                    #print(w1 + i, w2 + j)
-                    weight = gaussian_weighting(img_noise[i][j], img_noise[i + w1][j + w2], 5)
-                    numerator += img_noise[i + w1][j + w2] * weight
-                    denominator += weight
+for sigma in sigmas:
+    for i in range(0, img.shape[0]):
+        for j in range(0, img.shape[1]):
+            numerator = 0.0
+            denominator = 0.0
 
-        #print(numerator, denominator)
-        denoised[i][j] = numerator/denominator
+            for w1 in range(-12, 13):
+                for w2 in range(-12, 13):
+                    if not(w1 + i < 0 or w1 + i >= img.shape[0] or w2 + j < 0 or w2 + j >= img.shape[1]):
+                        weight = gaussian_weighting(i, j, i + w1, j + w2, sigma)
+                        numerator += img_noise[i + w1][j + w2] * weight
+                        denominator += weight
 
-plt.imshow(denoised, cmap='gray')
-plt.show()
+            #print(numerator, denominator)
+            denoised[i][j] = numerator/denominator
+
+    plt.imshow(denoised, cmap='gray')
+    plt.show()
 
 
 
