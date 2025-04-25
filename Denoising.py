@@ -1,6 +1,7 @@
 import matplotlib.pyplot as plt
 import numpy as np
 import cv2
+import bm3d
 
 img = cv2.imread('house.png', cv2.IMREAD_GRAYSCALE)
 
@@ -24,6 +25,8 @@ plt.imshow(img_noise, cmap='gray')
 plt.show()
 
 print(psnr(img, img_noise))
+
+# part 2
 
 def gaussian_weighting(x1, y1, x2, y2, sigma):
     mse = ((x1 - x2) ** 2 + (y1 - y2) ** 2) / 2.0
@@ -49,8 +52,23 @@ for sigma in sigmas:
             #print(numerator, denominator)
             denoised[i][j] = numerator/denominator
 
+    print(psnr(img, denoised))
+
     plt.imshow(denoised, cmap='gray')
     plt.show()
+
+# part 5
+sigmas = [5 / 255, 20 / 255, 50 / 255]
+img_noise_scale = img_noise / 255
+
+for sigma in sigmas:
+    denoised_bm3d = bm3d.bm3d(img_noise_scale, sigma)
+
+    print(psnr(img, denoised_bm3d))
+
+    plt.imshow(denoised_bm3d, cmap='gray')
+    plt.show()
+
 
 
 
