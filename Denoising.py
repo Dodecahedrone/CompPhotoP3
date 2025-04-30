@@ -29,7 +29,7 @@ print(psnr(img, img_noise))
 # part 2
 
 def gaussian_weighting(x1, y1, x2, y2, sigma):
-    mse = ((x1 - x2) ** 2 + (y1 - y2) ** 2) / 2.0
+    mse = ((x1 - x2) ** 2 + (y1 - y2) ** 2)
     return np.exp(-0.5 * mse / (sigma ** 2))
 
 denoised = np.zeros(img_noise.shape, dtype=float)
@@ -58,14 +58,14 @@ for sigma in sigmas:
 
 
 
-    # part 3
+# part 3
 
 def bilateral_weight(x1, y1, x2, y2, sigma_s, sigma_i):
     spatial = gaussian_weighting(x1,y1,x2,y2, sigma_s)
     intensity = np.exp(-((img_noise[x1, y1] - img_noise[x2, y2]) ** 2) / (2 * sigma_i ** 2))
     return spatial * intensity
 
-window_radius = 12     
+window_radius = 12       
 spacial_sigma = [1, 5, 25]
 intensity_sigma = [1, 5, 25, 50, 500]
 
@@ -78,7 +78,7 @@ for sigma_s in spacial_sigma:
                 denominator = 0.0
                 for w1 in range(-12,13):
                     for w2 in range(-12,13):
-                        if 0 <= i + w1 < img.shape[0] and 0 <= j + w2 < img.shape[1]:
+                        if(0 <= i + w1 < img.shape[0] and 0 <= j + w2 < img.shape[1]):
                             weight = bilateral_weight(i, j, i + w1, j + w2, sigma_s, sigma_i)
                             numerator += img_noise[i + w1, j + w2] * weight
                             denominator += weight
@@ -86,18 +86,18 @@ for sigma_s in spacial_sigma:
 
         print(f"σ_s={sigma_s:>2}, σ_i={sigma_i:>3}  PSNR: {psnr(img, denoised_bilat):.2f} dB")
         plt.imshow(denoised_bilat, cmap='gray')
-        plt.title(f"σs={sigma_s}, σi={sigma_i}")
-        plt.axis('off')
+        plt.title(f"σs={sigma_s}, σi={sigma_i} PSNR: {psnr(img, denoised_bilat):.2f} dB", )
         plt.show()
 
 # part 4
 
-for h_val in [1, 5, 25, 50, 500]:
-        den_uint8 = cv2.fastNlMeansDenoising(img_noise.astype(np.uint8),h=h_val,templateWindowSize=7,searchWindowSize=25)
+for patch_size in [1, 5, 25, 50, 500]:
+        den_uint8 = cv2.fastNlMeansDenoising(img_noise.astype(np.uint8),h=patch_size,templateWindowSize=7,searchWindowSize=25)
         den = den_uint8.astype(np.float32)
         plt.imshow(den, cmap="gray")
+        plt.title(f"NLM h={patch_size:>3}: {psnr(img, den):.2f} dB")
         plt.show()
-        print(f"NLM h={h_val:>3}: {psnr(img, den):.2f} dB")
+        print(f"NLM h={patch_size:>3}: {psnr(img, den):.2f} dB")
 
 
 # part 5
